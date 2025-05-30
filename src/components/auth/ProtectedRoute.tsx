@@ -1,10 +1,14 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import { useEffect } from 'react';
 import { initializeSalesperson } from '../../stores/salesStore';
 
-export default function ProtectedRoute() {
-  const { user } = useAuthStore();
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+}
+
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+  const user = useAuthStore((state) => state.user);
   
   useEffect(() => {
     // When a user logs in, initialize them as a salesperson if needed
@@ -15,9 +19,8 @@ export default function ProtectedRoute() {
 
   if (!user) {
     // Redirect to main login page if user is not authenticated
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" />;
   }
 
-  // Render child routes
-  return <Outlet />;
-}
+  return <>{children}</>;
+};

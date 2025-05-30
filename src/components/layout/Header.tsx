@@ -1,7 +1,8 @@
-import { Bell, Settings, LogOut } from 'lucide-react';
+import { Bell, Settings, LogOut, Menu } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import ThemeToggle from '../ui/ThemeToggle';
+import defaultAvatar from '../../assets/default-avatar.png';
 
 type HeaderProps = {
   toggleSidebar: () => void;
@@ -24,9 +25,7 @@ export default function Header({ toggleSidebar }: HeaderProps) {
           onClick={toggleSidebar}
           className="mr-4 block rounded-md p-2 text-light-textSecondary hover:bg-light-backgroundAlt dark:text-dark-textSecondary dark:hover:bg-dark-backgroundAlt lg:hidden"
         >
-          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
+          <Menu className="h-6 w-6" />
         </button>
         
         <Link to="/dashboard" className="flex items-center">
@@ -54,13 +53,13 @@ export default function Header({ toggleSidebar }: HeaderProps) {
         <div className="relative flex items-center">
           <Link to="/profile" className="flex items-center space-x-2 rounded-full p-1 hover:bg-light-backgroundAlt dark:hover:bg-dark-backgroundAlt">
             <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300">
-              {user?.avatar ? (
-                <img src={user.avatar} alt={user.name} className="h-full w-full object-cover" />
-              ) : (
-                <span className="text-sm font-medium">{user?.name?.charAt(0)}</span>
-              )}
+              <img
+                src={user?.avatar || defaultAvatar}
+                alt={`Avatar de ${user?.name || 'Usuário'}`}
+                className="h-full w-full object-cover"
+              />
             </div>
-            <span className="hidden text-sm font-medium md:block">{user?.name}</span>
+            <span className="hidden text-sm font-medium md:block">{user?.name || 'Usuário'}</span>
           </Link>
         </div>
         

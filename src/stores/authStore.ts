@@ -1,14 +1,15 @@
 import { create } from 'zustand';
 import { supabase } from '../lib/supabase';
-import { User } from '@supabase/supabase-js';
+import { User } from '../types/supabase';
 
 interface AuthState {
   user: User | null;
   loading: boolean;
   error: string | null;
-  login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
-  signUp: (email: string, password: string, metadata: { name: string; role: string }) => Promise<{ success: boolean; message?: string }>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  register: (data: { email: string; password: string; name: string; role: string; store_name?: string }) => Promise<void>;
+  updateUser: (data: { name?: string; avatar?: string }) => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; message?: string }>;
 }
 
@@ -19,46 +20,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   login: async (email: string, password: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data: { user }, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
 
-      set({ user: data.user, error: null });
-      return { success: true };
+      set({ user: user as User });
     } catch (error) {
-      set({ error: error.message });
-      return {
-        success: false,
-        message: 'Erro ao fazer login. Por favor, verifique suas credenciais.',
-      };
-    }
-  },
-
-  signUp: async (email: string, password: string, metadata) => {
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: metadata,
-        },
-      });
-
-      if (error) throw error;
-
-      return {
-        success: true,
-        message: 'Cadastro realizado com sucesso! Verifique seu email.',
-      };
-    } catch (error) {
-      set({ error: error.message });
-      return {
-        success: false,
-        message: 'Erro ao criar conta. Por favor, tente novamente.',
-      };
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
+      throw new Error('Erro ao fazer login');
     }
   },
 
@@ -66,9 +40,56 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      set({ user: null, error: null });
+      set({ user: null });
     } catch (error) {
-      set({ error: error.message });
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
+      throw new Error('Erro ao fazer logout');
+    }
+  },
+
+  register: async ({ email, password, name, role, store_name }) => {
+    try {
+      const { data: { user }, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            role,
+            store_name
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      set({ user: user as User });
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
+      throw new Error('Erro ao registrar usuário');
+    }
+  },
+
+  updateUser: async (data) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data
+      });
+
+      if (error) throw error;
+
+      set((state) => ({
+        user: state.user ? { ...state.user, ...data } : null
+      }));
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(error.message);
+      }
+      throw new Error('Erro ao atualizar usuário');
     }
   },
 
