@@ -5,7 +5,7 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 import LoadingScreen from './components/ui/LoadingScreen';
 import { useAuthStore } from './stores/authStore';
 import LoginPage from './pages/LoginPage';
-import EmployeeLoginPage from './pages/EmployeeLoginPage';
+import StoreOwnerRegisterPage from './pages/StoreOwnerRegisterPage';
 
 // Lazy load pages for better performance
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
@@ -13,6 +13,7 @@ const PreviewPage = lazy(() => import('./pages/PreviewPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const EmployeesPage = lazy(() => import('./pages/EmployeesPage'));
 const SalesPage = lazy(() => import('./pages/SalesPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 
 function App() {
   const { user } = useAuthStore();
@@ -20,13 +21,17 @@ function App() {
   return (
     <Routes>
       {/* Public routes */}
-      <Route 
-        path="/login" 
-        element={!user ? <LoginPage /> : <Navigate to="/dashboard" />} 
+      <Route
+        path="/login"
+        element={
+          user ? <Navigate to="/dashboard" replace /> : <LoginPage />
+        }
       />
-      <Route 
-        path="/login/funcionario" 
-        element={!user ? <EmployeeLoginPage /> : <Navigate to="/sales" />} 
+      <Route
+        path="/register"
+        element={
+          user ? <Navigate to="/dashboard" replace /> : <StoreOwnerRegisterPage />
+        }
       />
       <Route path="/preview" element={<PreviewPage />} />
 
@@ -38,11 +43,7 @@ function App() {
             path="/dashboard"
             element={
               <Suspense fallback={<LoadingScreen />}>
-                {user?.role === 'admin' ? (
-                  <DashboardPage />
-                ) : (
-                  <Navigate to="/sales" />
-                )}
+                <DashboardPage />
               </Suspense>
             }
           />
@@ -58,11 +59,22 @@ function App() {
               </Suspense>
             }
           />
-          <Route path="/profile" element={
-            <Suspense fallback={<LoadingScreen />}>
-              <ProfilePage />
-            </Suspense>
-          } />
+          <Route
+            path="/profile"
+            element={
+              <Suspense fallback={<LoadingScreen />}>
+                <ProfilePage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <Suspense fallback={<LoadingScreen />}>
+                <SettingsPage />
+              </Suspense>
+            }
+          />
 
           {/* Employee Routes */}
           <Route
@@ -80,24 +92,16 @@ function App() {
         </Route>
       </Route>
 
-      {/* Redirect root based on role */}
+      {/* Redirect root to dashboard or login */}
       <Route
         path="/"
         element={
-          <Navigate
-            to={
-              user
-                ? user.role === 'admin'
-                  ? '/dashboard'
-                  : '/sales'
-                : '/login'
-            }
-          />
+          user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
         }
       />
       
       {/* Catch all - 404 */}
-      <Route path="*" element={<Navigate to="/" />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
