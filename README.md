@@ -111,6 +111,48 @@ src/
 - ✅ Tema claro/escuro
 - ✅ Interface responsiva
 
+## Migrations
+
+### Criar Nova Migration
+```bash
+npm run migrate:create nome_da_migration
+# Exemplo: npm run migrate:create add_employee_status
+```
+Isso criará um novo arquivo de migration em `supabase/migrations` com o timestamp atual.
+
+### Executar Migrations
+```bash
+npm run migrate
+```
+
+### Estrutura das Migrations
+As migrations são executadas em ordem alfabética (por isso usamos timestamp no nome).
+Cada arquivo deve conter instruções SQL válidas e idempotentes.
+
+Exemplo de migration:
+```sql
+-- Criar nova tabela
+CREATE TABLE IF NOT EXISTS employees (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL
+);
+
+-- Adicionar coluna se não existir
+ALTER TABLE employees 
+ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'active';
+
+-- Criar índice se não existir
+CREATE INDEX IF NOT EXISTS idx_employees_status 
+ON employees(status);
+```
+
+### Boas Práticas
+1. Sempre use comandos idempotentes (IF NOT EXISTS, etc)
+2. Uma migration deve ser auto-contida
+3. Inclua rollback quando possível
+4. Documente alterações complexas
+5. Teste as migrations em ambiente de desenvolvimento
+
 ## Licença
 
 Este projeto está licenciado sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para mais detalhes. 

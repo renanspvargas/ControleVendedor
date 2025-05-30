@@ -5,11 +5,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "migrate": "ts-node scripts/migrate.ts",
+    "migrate:create": "node -e \"const fs=require('fs');const path=require('path');const name=process.argv[1];const timestamp=new Date().toISOString().replace(/[^0-9]/g, '').slice(0,14);const filename=`${timestamp}_${name}.sql`;const dir='supabase/migrations';if(!fs.existsSync(dir)){fs.mkdirSync(dir,{recursive:true});}fs.writeFileSync(path.join(dir,filename),'');\"",
+    "deploy": "npm run build && npm run migrate",
+    "deploy:vercel": "vercel --prod"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.49.8",
     "date-fns": "^2.30.0",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
@@ -19,6 +24,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
+    "@types/node": "^22.15.29",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
@@ -29,6 +35,7 @@
     "globals": "^15.9.0",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.3.0",
     "vite": "^5.4.2"
