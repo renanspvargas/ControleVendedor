@@ -1,25 +1,33 @@
-import { useState, FormEvent } from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 
-export default function LoginForm() {
-  const { login, error } = useAuthStore();
+export function LoginForm() {
+  const login = useAuthStore((state) => state.login);
+  const navigate = useNavigate();
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setMessage('');
 
-    const result = await login(email, password);
-    
-    if (!result.success && result.message) {
-      setMessage(result.message);
+    try {
+      await login(email, password);
+      navigate('/dashboard');
+    } catch (error) {
+      if (error instanceof Error) {
+        setMessage(error.message);
+      } else {
+        setMessage('Erro ao fazer login');
+      }
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   return (
@@ -31,6 +39,18 @@ export default function LoginForm() {
       </div>
       
       <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        {message && (
+          <div className="rounded-md bg-red-50 p-4 dark:bg-red-900/10">
+            <div className="flex">
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
+                  {message}
+                </h3>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="-space-y-px rounded-md shadow-sm">
           <div>
             <label htmlFor="email" className="sr-only">
@@ -63,18 +83,6 @@ export default function LoginForm() {
             />
           </div>
         </div>
-
-        {message && (
-          <div className="rounded-md bg-red-50 p-4 dark:bg-red-900/10">
-            <div className="flex">
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
-                  {message}
-                </h3>
-              </div>
-            </div>
-          </div>
-        )}
 
         <div>
           <button

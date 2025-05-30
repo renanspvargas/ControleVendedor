@@ -5,66 +5,42 @@ import { Eye, EyeOff, UserPlus } from 'lucide-react';
 import ThemeToggle from '../components/ui/ThemeToggle';
 
 export default function RegisterPage() {
+  const register = useAuthStore((state) => state.register);
+  const navigate = useNavigate();
+  
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
-  const { register } = useAuthStore();
-  const navigate = useNavigate();
-  
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validate form
-    if (!name) {
-      setError('Please enter your name');
-      return;
-    }
-    
-    if (!email) {
-      setError('Please enter your email');
-      return;
-    }
-    
-    if (!password) {
-      setError('Please enter a password');
-      return;
-    }
-    
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-    
-    if (!acceptTerms) {
-      setError('Please accept the terms and conditions');
-      return;
-    }
-    
+    setIsLoading(true);
     setError('');
-    setLoading(true);
-    
+
     try {
-      const result = await register(name, email, password);
-      
-      if (result.success) {
-        navigate('/dashboard');
+      await register({
+        email,
+        password,
+        name,
+        role: 'user'
+      });
+      navigate('/dashboard');
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
       } else {
-        setError(result.message || 'Registration failed. Please try again.');
+        setError('Erro ao criar conta');
       }
-    } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
-      console.error(err);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="flex min-h-screen flex-col bg-light-backgroundAlt transition-colors duration-300 dark:bg-dark-backgroundAlt">
       {/* Header with theme toggle */}
@@ -80,7 +56,7 @@ export default function RegisterPage() {
           <div className="rounded-xl border border-light-border bg-white p-8 shadow-md dark:border-dark-border dark:bg-dark-background">
             <div className="mb-6 text-center">
               <h2 className="text-3xl font-bold text-light-textPrimary dark:text-dark-textPrimary">
-                Create Account
+                Criar nova conta
               </h2>
               <p className="mt-2 text-light-textSecondary dark:text-dark-textSecondary">
                 Join SalesQueue to manage your sales
@@ -96,7 +72,7 @@ export default function RegisterPage() {
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div>
                 <label htmlFor="name" className="label">
-                  Full Name
+                  Nome
                 </label>
                 <input
                   id="name"
@@ -112,7 +88,7 @@ export default function RegisterPage() {
               
               <div>
                 <label htmlFor="email" className="label">
-                  Email address
+                  Email
                 </label>
                 <input
                   id="email"
@@ -128,7 +104,7 @@ export default function RegisterPage() {
               
               <div>
                 <label htmlFor="password" className="label">
-                  Password
+                  Senha
                 </label>
                 <div className="relative">
                   <input
@@ -195,10 +171,10 @@ export default function RegisterPage() {
               <button
                 type="submit"
                 className="btn-primary relative mt-2 w-full"
-                disabled={loading}
+                disabled={isLoading}
               >
                 <span className="flex items-center justify-center">
-                  {loading ? (
+                  {isLoading ? (
                     <svg className="h-5 w-5 animate-spin\" viewBox="0 0 24 24">
                       <circle 
                         className="opacity-25" 
@@ -218,7 +194,7 @@ export default function RegisterPage() {
                   ) : (
                     <>
                       <UserPlus className="mr-2 h-5 w-5" />
-                      Create Account
+                      Criar conta
                     </>
                   )}
                 </span>
