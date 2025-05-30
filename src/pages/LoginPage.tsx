@@ -4,14 +4,13 @@ import { useAuthStore } from '../stores/authStore';
 import ThemeToggle from '../components/ui/ThemeToggle';
 
 export default function LoginPage() {
+  const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
-  const { login } = useAuthStore();
-  const [isLoading, setIsLoading] = useState(false);
+  
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-  });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,14 +18,14 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const result = await login(formData.username, formData.password);
-      if (result.success) {
-        navigate('/dashboard');
-      } else {
-        setError(result.message || 'Erro ao fazer login.');
-      }
+      await login(email, password);
+      navigate('/dashboard');
     } catch (error) {
-      setError('Ocorreu um erro. Tente novamente.');
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('Erro ao fazer login');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -63,18 +62,19 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label
-                  htmlFor="username"
+                  htmlFor="email"
                   className="block text-sm font-medium text-light-textSecondary dark:text-dark-textSecondary"
                 >
-                  Usuário
+                  Email
                 </label>
                 <input
-                  id="username"
-                  name="username"
-                  type="text"
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
                   required
-                  value={formData.username}
-                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="mt-1 block w-full rounded-md border border-light-border bg-light-background px-3 py-2 text-light-textPrimary shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-dark-border dark:bg-dark-background dark:text-dark-textPrimary"
                 />
               </div>
@@ -90,9 +90,10 @@ export default function LoginPage() {
                   id="password"
                   name="password"
                   type="password"
+                  autoComplete="current-password"
                   required
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="mt-1 block w-full rounded-md border border-light-border bg-light-background px-3 py-2 text-light-textPrimary shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-dark-border dark:bg-dark-background dark:text-dark-textPrimary"
                 />
               </div>

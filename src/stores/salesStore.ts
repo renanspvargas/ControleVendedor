@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { format } from 'date-fns';
+import { User } from '../types/supabase';
 
 export type Salesperson = {
   id: string;
@@ -8,16 +9,15 @@ export type Salesperson = {
   avatar?: string;
 };
 
-export type Sale = {
+interface Sale {
   id: string;
   salespersonId: string;
-  timestamp: number; // Unix timestamp of sale creation
-  lastModified: number; // Unix timestamp of last modification
-  formattedTime: string; // Human-readable time
-  order?: number; // Optional order field for manual sorting
-};
+  timestamp: number;
+  lastModified: number;
+  formattedTime: string;
+}
 
-type SalesState = {
+interface SalesState {
   salespeople: Salesperson[];
   sales: Sale[];
   addSalesperson: (salesperson: Salesperson) => void;
@@ -29,7 +29,8 @@ type SalesState = {
   getSalesQueue: () => Salesperson[]; // Returns salespeople ordered by most recent sale
   clearAllSales: () => void;
   recentSalesBySalesperson: (salespersonId: string, limit?: number) => Sale[];
-};
+  addSale: (salespersonId: string) => void;
+}
 
 // Helper to format timestamp
 const formatTimestamp = (timestamp: number): string => {
@@ -69,7 +70,7 @@ export const useSalesStore = create<SalesState>()(
           salespersonId,
           timestamp: now,
           lastModified: now,
-          formattedTime: formatTimestamp(now)
+          formattedTime: format(now, 'dd/MM/yyyy HH:mm:ss')
         };
         
         set(state => ({
@@ -169,6 +170,22 @@ export const useSalesStore = create<SalesState>()(
           .sort((a, b) => b.lastModified - a.lastModified)
           .slice(0, limit);
       },
+
+      addSale: (salespersonId) => {
+        const now = Date.now();
+        set((state) => ({
+          sales: [
+            ...state.sales,
+            {
+              id: Math.random().toString(36).substr(2, 9),
+              salespersonId,
+              timestamp: now,
+              lastModified: now,
+              formattedTime: format(now, 'dd/MM/yyyy HH:mm:ss')
+            },
+          ],
+        }));
+      },
     }),
     {
       name: 'sales-storage',
@@ -176,18 +193,10 @@ export const useSalesStore = create<SalesState>()(
   )
 );
 
-// Initialize store with user data when they log in
-export const initializeSalesperson = (user: { id: string; name: string; avatar?: string }) => {
-  const { salespeople, addSalesperson } = useSalesStore.getState();
+export const initializeSalesperson = (user: Partial<Salesperson>) => {
+  if (!user.id) return;
   
-  // Check if salesperson already exists
-  const exists = salespeople.some(sp => sp.id === user.id);
-  
-  if (!exists) {
-    addSalesperson({
-      id: user.id,
-      name: user.name,
-      avatar: user.avatar
-    });
-  }
+  // Initialize salesperson in the store if needed
+  // This is just a placeholder for now
+  console.log('Initializing salesperson:', user);
 };

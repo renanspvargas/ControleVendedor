@@ -5,13 +5,12 @@ import { format, isToday, isYesterday } from 'date-fns';
 import { ShoppingBag, GripVertical, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-type SalesHistoryProps = {
+interface SalesHistoryProps {
+  salespersonId: string;
   limit?: number;
-  showTitle?: boolean;
-  compact?: boolean;
-};
+}
 
-export default function SalesHistory({ limit = 5, showTitle = true, compact = false }: SalesHistoryProps) {
+export default function SalesHistory({ salespersonId, limit = 10 }: SalesHistoryProps) {
   const { user } = useAuthStore();
   const { sales, deleteSale, reorderSales } = useSalesStore();
   const { employees } = useEmployeesStore();
@@ -24,19 +23,12 @@ export default function SalesHistory({ limit = 5, showTitle = true, compact = fa
     ? sales // Show all sales for admin
     : sales.filter(sale => sale.salespersonId === user.id); // Show only user's sales for employees
 
-  // Sort sales by order if available, otherwise by lastModified
-  const displaySales = [...filteredSales]
-    .sort((a, b) => {
-      // If both have order, use it
-      if (a.order !== undefined && b.order !== undefined) {
-        return a.order - b.order;
-      }
-      // If neither has order or if we want to sort by lastModified
-      return b.lastModified - a.lastModified;
-    })
+  // Sort sales by timestamp
+  const sortedSales = [...filteredSales]
+    .sort((a, b) => b.timestamp - a.timestamp)
     .slice(0, limit);
   
-  if (displaySales.length === 0) {
+  if (sortedSales.length === 0) {
     return (
       <div className="rounded-lg border border-light-border bg-white p-6 text-center shadow-md dark:border-dark-border dark:bg-dark-backgroundAlt">
         <p className="text-light-textSecondary dark:text-dark-textSecondary">
@@ -68,7 +60,7 @@ export default function SalesHistory({ limit = 5, showTitle = true, compact = fa
     e.preventDefault();
     if (!draggedSale) return;
 
-    const draggedIndex = displaySales.findIndex(s => s.id === draggedSale);
+    const draggedIndex = sortedSales.findIndex(s => s.id === draggedSale);
     if (draggedIndex === index) return;
 
     reorderSales(draggedSale, index);
@@ -86,15 +78,13 @@ export default function SalesHistory({ limit = 5, showTitle = true, compact = fa
   };
   
   return (
-    <div className={`rounded-lg border border-light-border bg-white shadow-md dark:border-dark-border dark:bg-dark-backgroundAlt ${compact ? 'p-3' : 'p-6'}`}>
-      {showTitle && (
-        <h2 className={`mb-4 font-semibold text-light-textPrimary dark:text-dark-textPrimary ${compact ? 'text-lg' : 'text-xl'}`}>
-          {user.role === 'admin' ? 'Histórico de Vendas' : 'Suas Vendas Recentes'}
-        </h2>
-      )}
+    <div className={`rounded-lg border border-light-border bg-white shadow-md dark:border-dark-border dark:bg-dark-backgroundAlt p-6`}>
+      <h2 className={`mb-4 font-semibold text-light-textPrimary dark:text-dark-textPrimary text-xl`}>
+        {user.role === 'admin' ? 'Histórico de Vendas' : 'Suas Vendas Recentes'}
+      </h2>
       
       <div className="space-y-2">
-        {displaySales.map((sale, index) => (
+        {sortedSales.map((sale, index) => (
           <div 
             key={sale.id}
             draggable={user.role === 'admin'}
