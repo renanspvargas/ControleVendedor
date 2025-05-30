@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  body {
+    @apply bg-light-background text-light-textPrimary transition-colors duration-300 dark:bg-dark-background dark:text-dark-textPrimary;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold leading-tight;
+  }
+
+  h1 {
+    @apply text-3xl md:text-4xl;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl;
+  }
+
+  h3 {
+    @apply text-xl md:text-2xl;
+  }
+
+  h4 {
+    @apply text-lg md:text-xl;
+  }
+
+  p {
+    @apply leading-relaxed;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+  }
+
+  .btn-secondary {
+    @apply btn bg-secondary-600 text-white hover:bg-secondary-700 focus:ring-secondary-500;
+  }
+
+  .btn-accent {
+    @apply btn bg-accent-600 text-white hover:bg-accent-700 focus:ring-accent-500;
+  }
+
+  .btn-outline {
+    @apply btn border border-light-border bg-transparent hover:bg-light-backgroundAlt dark:border-dark-border dark:hover:bg-dark-backgroundAlt;
+  }
+
+  .card {
+    @apply rounded-lg border border-light-border bg-white p-6 shadow-md transition-all duration-300 dark:border-dark-border dark:bg-dark-backgroundAlt dark:shadow-dark-md;
+  }
+
+  .input {
+    @apply w-full rounded-lg border border-light-border bg-light-background px-4 py-2 text-light-textPrimary transition-colors duration-200 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-dark-border dark:bg-dark-backgroundAlt dark:text-dark-textPrimary dark:focus:border-primary-400 dark:focus:ring-primary-400;
+  }
+
+  .label {
+    @apply mb-2 block text-sm font-medium text-light-textPrimary dark:text-dark-textPrimary;
+  }
+}
+
+@layer utilities {
+  .animate-in {
+    @apply animate-fade-in;
+  }
+  
+  .slide-in {
+    @apply animate-slide-in;
+  }
+  
+  .scale-in {
+    @apply animate-scale-in;
+  }
+}
