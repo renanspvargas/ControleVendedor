@@ -2,10 +2,22 @@ import { Bell, Settings, LogOut, Menu } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
 import ThemeToggle from '../ui/ThemeToggle';
-import defaultAvatar from '../../assets/default-avatar.png';
+import defaultAvatar from '../../assets/default-avatar.svg';
+import { USER_ROLES } from '../../constants/roles';
 
 type HeaderProps = {
   toggleSidebar: () => void;
+};
+
+const getRoleName = (role: string) => {
+  switch (role) {
+    case USER_ROLES.ADMIN:
+      return 'Administrador';
+    case USER_ROLES.SALESPERSON:
+      return 'Vendedor';
+    default:
+      return 'Usuário';
+  }
 };
 
 export default function Header({ toggleSidebar }: HeaderProps) {
@@ -16,6 +28,8 @@ export default function Header({ toggleSidebar }: HeaderProps) {
     logout();
     navigate('/login', { replace: true });
   };
+
+  if (!user) return null;
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-light-border bg-white px-4 shadow-sm transition-colors duration-300 dark:border-dark-border dark:bg-dark-background dark:shadow-dark-sm md:px-6">
@@ -54,12 +68,19 @@ export default function Header({ toggleSidebar }: HeaderProps) {
           <Link to="/profile" className="flex items-center space-x-2 rounded-full p-1 hover:bg-light-backgroundAlt dark:hover:bg-dark-backgroundAlt">
             <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300">
               <img
-                src={user?.avatar || defaultAvatar}
-                alt={`Avatar de ${user?.name || 'Usuário'}`}
+                src={user.avatar || defaultAvatar}
+                alt={`Avatar de ${user.name}`}
                 className="h-full w-full object-cover"
               />
             </div>
-            <span className="hidden text-sm font-medium md:block">{user?.name || 'Usuário'}</span>
+            <div className="hidden flex-col md:flex">
+              <span className="text-sm font-medium text-light-textPrimary dark:text-dark-textPrimary">
+                {user.name}
+              </span>
+              <span className="text-xs text-light-textSecondary dark:text-dark-textSecondary">
+                {getRoleName(user.role || '')}
+              </span>
+            </div>
           </Link>
         </div>
         

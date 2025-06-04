@@ -3,7 +3,8 @@ import { useAuthStore } from '../../stores/authStore';
 import { useEmployeesStore } from '../../stores/employeesStore';
 import { format, isToday, isYesterday } from 'date-fns';
 import { ShoppingBag, GripVertical, Trash2 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { USER_ROLES } from '../../constants/roles';
 
 interface SalesHistoryProps {
   salespersonId: string;
@@ -19,7 +20,7 @@ export default function SalesHistory({ salespersonId, limit = 10 }: SalesHistory
   if (!user) return null;
   
   // Get sales based on user role
-  const filteredSales = user.role === 'admin'
+  const filteredSales = user.role === USER_ROLES.ADMIN
     ? sales // Show all sales for admin
     : sales.filter(sale => sale.salespersonId === user.id); // Show only user's sales for employees
 
@@ -32,7 +33,7 @@ export default function SalesHistory({ salespersonId, limit = 10 }: SalesHistory
     return (
       <div className="rounded-lg border border-light-border bg-white p-6 text-center shadow-md dark:border-dark-border dark:bg-dark-backgroundAlt">
         <p className="text-light-textSecondary dark:text-dark-textSecondary">
-          {user.role === 'admin' ? 'Nenhuma venda registrada ainda.' : 'Você não registrou nenhuma venda ainda.'}
+          {user.role === USER_ROLES.ADMIN ? 'Nenhuma venda registrada ainda.' : 'Você não registrou nenhuma venda ainda.'}
         </p>
       </div>
     );
@@ -78,25 +79,25 @@ export default function SalesHistory({ salespersonId, limit = 10 }: SalesHistory
   };
   
   return (
-    <div className={`rounded-lg border border-light-border bg-white shadow-md dark:border-dark-border dark:bg-dark-backgroundAlt p-6`}>
-      <h2 className={`mb-4 font-semibold text-light-textPrimary dark:text-dark-textPrimary text-xl`}>
-        {user.role === 'admin' ? 'Histórico de Vendas' : 'Suas Vendas Recentes'}
+    <div className="rounded-lg border border-light-border bg-white p-6 shadow-md dark:border-dark-border dark:bg-dark-backgroundAlt">
+      <h2 className="mb-4 text-xl font-semibold text-light-textPrimary dark:text-dark-textPrimary">
+        {user.role === USER_ROLES.ADMIN ? 'Histórico de Vendas' : 'Suas Vendas Recentes'}
       </h2>
       
       <div className="space-y-2">
         {sortedSales.map((sale, index) => (
           <div 
             key={sale.id}
-            draggable={user.role === 'admin'}
+            draggable={user.role === USER_ROLES.ADMIN}
             onDragStart={() => handleDragStart(sale.id)}
             onDragOver={(e) => handleDragOver(e, index)}
             onDragEnd={handleDragEnd}
             className={`flex items-center justify-between rounded-md border border-light-border bg-light-backgroundAlt px-4 py-3 dark:border-dark-border dark:bg-dark-background ${
               draggedSale === sale.id ? 'opacity-50' : ''
-            } ${user.role === 'admin' ? 'cursor-move' : ''}`}
+            } ${user.role === USER_ROLES.ADMIN ? 'cursor-move' : ''}`}
           >
             <div className="flex items-center">
-              {user.role === 'admin' && (
+              {user.role === USER_ROLES.ADMIN && (
                 <div className="mr-2 text-light-textSecondary dark:text-dark-textSecondary">
                   <GripVertical className="h-4 w-4" />
                 </div>
@@ -108,7 +109,7 @@ export default function SalesHistory({ salespersonId, limit = 10 }: SalesHistory
                 <span className="text-light-textPrimary dark:text-dark-textPrimary">
                   Venda registrada
                 </span>
-                {user.role === 'admin' && (
+                {user.role === USER_ROLES.ADMIN && (
                   <p className="text-sm text-light-textSecondary dark:text-dark-textSecondary">
                     por {getSalespersonName(sale.salespersonId)}
                   </p>
@@ -119,7 +120,7 @@ export default function SalesHistory({ salespersonId, limit = 10 }: SalesHistory
               <span className="text-sm text-light-textSecondary dark:text-dark-textSecondary">
                 {formatDate(sale.timestamp)}
               </span>
-              {user.role === 'admin' && (
+              {user.role === USER_ROLES.ADMIN && (
                 <button
                   onClick={() => handleDelete(sale.id)}
                   className="text-light-textSecondary hover:text-red-600 dark:text-dark-textSecondary dark:hover:text-red-400"

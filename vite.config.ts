@@ -7,6 +7,7 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  envDir: '.',  // Look for env files in the root directory
   build: {
     outDir: 'dist',
     sourcemap: true,

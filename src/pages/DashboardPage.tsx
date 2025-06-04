@@ -7,6 +7,7 @@ import SalesHistory from '../components/sales/SalesHistory';
 import { Users, ShoppingBag, Clock, Eye } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { startOfDay } from 'date-fns';
+import { USER_ROLES } from '../constants/roles';
 
 export default function DashboardPage() {
   const user = useAuthStore((state) => state.user);
@@ -37,9 +38,9 @@ export default function DashboardPage() {
 
   // Set initial selected employee when component mounts or when active employees change
   useEffect(() => {
-    if (user.role === 'admin' && activeEmployees.length > 0 && !selectedEmployee) {
+    if (user.role === USER_ROLES.ADMIN && activeEmployees.length > 0 && !selectedEmployee) {
       setSelectedEmployee(activeEmployees[0].id);
-    } else if (user.role !== 'admin') {
+    } else if (user.role !== USER_ROLES.ADMIN) {
       setSelectedEmployee(user.id);
     }
   }, [user.role, user.id, activeEmployees, selectedEmployee]);
@@ -48,7 +49,7 @@ export default function DashboardPage() {
   const selectedEmployeeData = activeEmployees.find(emp => emp.id === selectedEmployee);
   
   // Disable register button if no valid employee is selected
-  const isRegisterDisabled = user.role === 'admin' && !selectedEmployeeData;
+  const isRegisterDisabled = user.role === USER_ROLES.ADMIN && !selectedEmployeeData;
   
   const totalSales = sales.length;
   const todaySales = sales.filter(sale => {
@@ -59,24 +60,6 @@ export default function DashboardPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-2">Total de Vendas</h3>
-          <p className="text-3xl font-bold text-primary-600">{totalSales}</p>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-2">Vendas Hoje</h3>
-          <p className="text-3xl font-bold text-primary-600">{todaySales}</p>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold mb-4">Histórico de Vendas</h2>
-        <SalesHistory salespersonId={user.id} limit={10} />
-      </div>
 
       <div className="mx-auto max-w-6xl">
         <div className="mb-6">
@@ -147,13 +130,13 @@ export default function DashboardPage() {
                 Registrar Venda
               </h2>
               <p className="mt-1 text-light-textSecondary dark:text-dark-textSecondary">
-                {user.role === 'admin' 
+                {user.role === USER_ROLES.ADMIN 
                   ? 'Selecione um vendedor e clique no botão abaixo para registrar uma venda.'
                   : 'Clique no botão abaixo quando realizar uma venda para atualizar a fila.'}
               </p>
             </div>
 
-            {user.role === 'admin' && (
+            {user.role === USER_ROLES.ADMIN && (
               <div className="mb-4">
                 <label htmlFor="employee" className="mb-2 block text-sm font-medium text-light-textSecondary dark:text-dark-textSecondary">
                   Selecionar Vendedor

@@ -1,15 +1,29 @@
 import { Home, User, Eye, Settings, Users } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useAuthStore } from '../../stores/authStore';
+import { USER_ROLES } from '../../constants/roles';
 
 type SidebarProps = {
   isOpen: boolean;
   toggleSidebar: () => void;
 };
 
+const getRoleName = (role: string) => {
+  switch (role) {
+    case USER_ROLES.ADMIN:
+      return 'Administrador';
+    case USER_ROLES.SALESPERSON:
+      return 'Vendedor';
+    default:
+      return 'Usuário';
+  }
+};
+
 export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
   const { user } = useAuthStore();
   
+  if (!user) return null;
+
   return (
     <>
       {/* Mobile overlay */}
@@ -57,10 +71,10 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
               Dashboard
             </NavLink>
 
-            {/* Only show Employees link for admin users */}
-            {user?.role === 'admin' && (
+            {/* Only show Employees link for admins */}
+            {user.role === USER_ROLES.ADMIN && (
               <NavLink 
-                to="/funcionarios" 
+                to="/employees" 
                 className={({ isActive }) =>
                   `flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                     isActive 
@@ -85,7 +99,7 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
               }
             >
               <User className="mr-3 h-5 w-5" />
-              Profile
+              Perfil
             </NavLink>
             
             <NavLink 
@@ -94,7 +108,7 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
               className="flex items-center rounded-md px-3 py-2 text-sm font-medium text-light-textPrimary transition-colors hover:bg-light-backgroundAlt dark:text-dark-textPrimary dark:hover:bg-dark-backgroundAlt"
             >
               <Eye className="mr-3 h-5 w-5" />
-              Preview Mode
+              Modo de Visualização
             </NavLink>
           </nav>
           
@@ -102,12 +116,12 @@ export default function Sidebar({ isOpen, toggleSidebar }: SidebarProps) {
           <div className="mt-auto border-t border-light-border pt-4 dark:border-dark-border">
             <div className="flex items-center">
               <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300">
-                <span className="text-lg font-medium">{user?.name?.charAt(0)}</span>
+                <span className="text-lg font-medium">{user.name?.charAt(0)}</span>
               </div>
               <div className="ml-3">
-                <p className="text-sm font-medium">{user?.name}</p>
+                <p className="text-sm font-medium text-light-textPrimary dark:text-dark-textPrimary">{user.name}</p>
                 <p className="text-xs text-light-textSecondary dark:text-dark-textSecondary">
-                  {user?.role === 'admin' ? 'Administrador' : 'Vendedor'}
+                  {getRoleName(user.role || '')}
                 </p>
               </div>
             </div>
